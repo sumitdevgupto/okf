@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Open Knowledge Format: The Context Layer — Sumit Gupta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── RESET & BASE ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #0B1F3A;
+      --ink:    #1A2B3C;
+      --body:   #2E3E50;
+      --muted:  #5E7590;
+      --border: #C8D6E5;
+      --bg:     #F6F9FC;
+      --white:  #FFFFFF;
+      --amber:  #D4951A;
+      --amber-light: #FDF3DC;
+      --amber-mid:   #E8A838;
+      --green:  #1A6B3A;
+      --green-light: #EAF5EE;
+      --red:    #9B2335;
+      --red-light: #FAECEE;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--body);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.78;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── LAYOUT ── */
+    .wrap {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 0 28px;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: var(--navy);
+      padding: 14px 0;
+    }
+    .topbar .wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar-label {
+      color: #7DD3FC;
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .topbar-tag {
+      color: #7DD3FC;
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+
+    /* ── HERO / BYLINE ── */
+    .hero {
+      padding: 64px 0 0;
+      background: var(--white);
+      border-bottom: 3px solid var(--amber-mid);
+    }
+    .hero-eyebrow {
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--amber);
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(32px, 5vw, 52px);
+      line-height: 1.12;
+      color: var(--navy);
+      font-weight: 400;
+      margin-bottom: 24px;
+      max-width: 620px;
+    }
+    .hero-deck {
+      font-size: 19px;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 580px;
+      margin-bottom: 36px;
+      font-weight: 300;
+    }
+    .byline-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 22px 0 28px;
+      border-top: 1px solid var(--border);
+    }
+    .byline-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--amber-mid);
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .byline-text strong { display: block; color: var(--navy); font-size: 14px; font-weight: 600; }
+    .byline-text span   { color: var(--muted); font-size: 13px; }
+
+    /* ── ARTICLE BODY ── */
+    .article {
+      background: var(--white);
+      padding: 56px 0 80px;
+    }
+
+    /* Section fade-in */
+    .section {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+      margin-bottom: 52px;
+    }
+    .section.visible { opacity: 1; transform: translateY(0); }
+
+    /* Prose paragraphs */
+    .section p {
+      margin-bottom: 22px;
+      color: var(--body);
+    }
+    .section p:last-child { margin-bottom: 0; }
+
+    /* Section heading */
+    .section-label {
+      font-size: 10.5px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--amber);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .section h2 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(22px, 3.5vw, 30px);
+      color: var(--navy);
+      font-weight: 400;
+      line-height: 1.25;
+      margin-bottom: 20px;
+    }
+
+    /* ── DATA HIGHLIGHT ── */
+    .stat {
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    /* ── PULL QUOTE — signature element ── */
+    .pullquote {
+      position: relative;
+      margin: 48px 0;
+      padding: 28px 32px 28px 40px;
+      border-left: 5px solid var(--amber-mid);
+      background: var(--amber-light);
+      border-radius: 0 8px 8px 0;
+    }
+    .pullquote::before {
+      content: '\201C';
+      font-family: 'DM Serif Display', serif;
+      font-size: 100px;
+      line-height: 0.6;
+      color: var(--amber-mid);
+      opacity: 0.35;
+      position: absolute;
+      top: 28px;
+      left: 10px;
+    }
+    .pullquote p {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(18px, 2.5vw, 22px);
+      line-height: 1.45;
+      color: var(--ink);
+      font-style: italic;
+      margin: 0 !important;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── TABLES ── */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 28px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14.5px;
+    }
+    thead tr {
+      background: var(--navy);
+    }
+    thead th {
+      color: var(--white);
+      font-weight: 600;
+      padding: 13px 18px;
+      text-align: left;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+    tbody tr:nth-child(even) { background: #F0F5FA; }
+    tbody tr:nth-child(odd)  { background: var(--white); }
+    tbody td {
+      padding: 13px 18px;
+      color: var(--body);
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    td strong { color: var(--navy); }
+    td .phase-num {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--amber-mid);
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 24px;
+      margin-right: 6px;
+    }
+    td .active {
+      display: inline-block;
+      background: var(--amber-mid);
+      color: var(--white);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 2px 7px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      margin-left: 6px;
+    }
+
+    /* ── STAT CARDS (3-up) ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 16px;
+      margin: 28px 0;
+    }
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      border-top: 3px solid var(--amber-mid);
+    }
+    .stat-card.warn  { border-top-color: var(--red); }
+    .stat-card.good  { border-top-color: var(--green); }
+    .stat-card .big  {
+      font-family: 'DM Serif Display', serif;
+      font-size: 36px;
+      color: var(--navy);
+      line-height: 1.1;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .stat-card .label { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .stat-card .source { font-size: 11px; color: #B0BFCC; margin-top: 8px; display: block; }
+
+    /* ── STACK TABLE ── */
+    .stack {
+      margin: 28px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .stack-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+    }
+    .stack-row.primary {
+      background: var(--navy);
+      border-color: var(--navy);
+    }
+    .stack-row.primary .stack-label  { color: var(--amber-mid); }
+    .stack-row.primary .stack-desc   { color: #A8BECE; }
+    .stack-label {
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 1px;
+      color: var(--navy);
+      min-width: 46px;
+    }
+    .stack-desc { font-size: 14px; color: var(--muted); }
+
+    /* ── BULLET LIST ── */
+    .prose-list {
+      list-style: none;
+      margin: 16px 0 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .prose-list li {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .prose-list li::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--amber-mid);
+      flex-shrink: 0;
+      margin-top: 9px;
+    }
+
+    /* ── QUESTIONS BLOCK ── */
+    .questions {
+      background: var(--amber-light);
+      border: 1px solid #EDD9A3;
+      border-radius: 8px;
+      padding: 28px 32px;
+      margin: 32px 0;
+    }
+    .questions h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      color: var(--navy);
+      margin-bottom: 18px;
+      font-weight: 400;
+    }
+    .questions ol {
+      padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+    .questions ol li { color: var(--body); font-size: 15.5px; }
+
+    /* ── SOURCES ── */
+    .sources {
+      margin-top: 52px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+    }
+    .sources h3 {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+    .sources ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .sources ul li { font-size: 13px; color: var(--muted); }
+    .sources ul li strong { color: var(--body); font-weight: 500; }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: var(--navy);
+      padding: 36px 0;
+      text-align: center;
+    }
+    .footer p { color: #4B6480; font-size: 13px; line-height: 1.9; }
+    .footer .tags { color: #7DD3FC; font-size: 12px; margin-top: 10px; }
+
+
+    .topbar-label a,
+    .topbar-tag a {
+      color: inherit;
+      text-decoration: none;
+    }
+    .topbar-label a:hover,
+    .topbar-tag a:hover {
+      text-decoration: underline;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+      .pullquote { padding: 22px 20px 22px 28px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .section { opacity: 1; transform: none; transition: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="wrap">
+      <span class="topbar-label">Enterprise AI · OKF Impact · Long Read</span>
+      <span class="topbar-tag">June 2026</span>
+      <span class="topbar-label"><a href="infographic.html" target="_blank">Infographic →</a></span>
+    </div>
+
+    <div class="wrap">
+      <span class="topbar-label">Content curated by <a href="https://www.linkedin.com/in/sumitdevgupta/">Sumit Gupta</a> formatted by AI</span>
+      <a href="https://sumitdevgupto.github.io/blogs/" class="topbar-label">All Blogs</a>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="wrap">
+      <p class="hero-eyebrow">The Next Frontier of Digitisation</p>
+      <h1>Open Knowledge Format (OKF): The Context Layer Agentic AI Has Been Waiting For</h1>
+      <p class="hero-deck">What GCC leaders and CXOs need to understand about V3 of Enterprise digitisation — and the question it opens that deserves a candid executive conversation.</p>
+      
+  </header>
+
+  <!-- Article -->
+  <main class="article">
+    <div class="wrap">
+
+      <!-- Opening -->
+      <div class="section">
+        <p>On 12 June 2026, Google Cloud published something most enterprise leaders haven't read yet — but probably should. The <strong>Open Knowledge Format (OKF) v0.1</strong> is a vendor-neutral, open specification for packaging organisational knowledge — table schemas, metric definitions, runbooks, API documentation, internal processes — into a directory of plain Markdown files. No proprietary SDK. No new runtime. No lock-in. Released under Apache 2.0, it is available today on GitHub. Google itself describes it as <em>"a starting point, not a finished standard."</em></p>
+        <p>It sounds like a technical footnote. I think it is a strategic signal — and I want to think through it out loud.</p>
+      </div>
+
+      <!-- Section 1: Three phases -->
+      <div class="section">
+        <p class="section-label">The Big Picture</p>
+        <h2>A Simple Way to Frame Where We Are</h2>
+        <p>For two decades, enterprise transformation has run in phases. We digitised <strong>data</strong>. We digitised <strong>process</strong>. What we never really digitised is <strong>organisational knowledge</strong> — the context that explains how the business actually works.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Phase</th>
+                <th>What we digitised</th>
+                <th>Examples</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="phase-num">1</span></td>
+                <td><strong>Data</strong></td>
+                <td>ERP, CRM, SCM, transactional systems</td>
+                <td>Largely done</td>
+              </tr>
+              <tr>
+                <td><span class="phase-num">2</span></td>
+                <td><strong>Process</strong></td>
+                <td>Workflow automation, BPM, SaaS platforms</td>
+                <td>Well underway</td>
+              </tr>
+              <tr>
+                <td><span class="phase-num">3</span></td>
+                <td><strong>Knowledge</strong></td>
+                <td>Context AI agents need before they act</td>
+                <td><span class="active">OKF targets this</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Most of Phase 3 still lives in the wrong places: definitions buried in Confluence, rules embedded in application code, and — most fragile of all — expertise sitting in the heads of a few senior people. That has always been a risk. Agentic AI turns it into a constraint.</p>
+      </div>
+
+      <!-- Section 2: P&L problem -->
+      <div class="section">
+        <p class="section-label">The Data</p>
+
+        <div class="stat-grid">
+          <div class="stat-card warn">
+            <span class="big">$31.5B</span>
+            <span class="label">Lost annually by Fortune 500 firms from poor knowledge sharing</span>
+            <span class="source">IDC</span>
+          </div>
+          <div class="stat-card warn">
+            <span class="big">1.8 hrs</span>
+            <span class="label">wasted per employee per day searching for information — ≈ 1 in 5 people contributing zero output</span>
+            <span class="source">Interact Research</span>
+          </div>
+          <div class="stat-card warn">
+            <span class="big">10%</span>
+            <span class="label">first-attempt success rate for enterprise search tools, vs 95% for consumer search</span>
+            <span class="source">Glean, 2025</span>
+          </div>
+          <div class="stat-card warn">
+            <span class="big">62%</span>
+            <span class="label">of organisations say poor knowledge-sharing directly causes project failures</span>
+            <span class="source">Document360 / industry surveys</span>
+          </div>
+          <div class="stat-card good">
+            <span class="big">20–25%</span>
+            <span class="label">productivity uplift from strong knowledge management systems — the upside case for fixing this</span>
+            <span class="source">McKinsey Global Institute</span>
+          </div>
+        </div>
+
+        <p>And then the AI-specific pressure on top of those foundations: <span class="stat">Gartner projects that 40% of enterprise applications will embed task-specific AI agents by end-2026, up from under 5% in 2025.</span> The sobering counterweight, also from Gartner: <span class="stat">over 40% of agentic AI projects are forecast to be cancelled by 2027</span> — with inadequate context and weak governance among the cited causes.</p>
+        <p>Read those last two together and you get the real story. Agents are arriving fast, and a large share of agent projects fail for lack of <em>context</em>. OKF is aimed squarely at that gap.</p>
+      </div>
+
+      <!-- Pull quote -->
+      <div class="section pullquote-wrap">
+        <div class="pullquote">
+          <p>Most organisations do not have a productivity problem. They have a knowledge retrieval problem. The information exists. The expertise exists. But getting the right knowledge to the right agent at the right moment remains painfully difficult.</p>
+        </div>
+      </div>
+
+      <!-- Section 3: What OKF does -->
+      <div class="section">
+        <p class="section-label">The Specification</p>
+        <h2>What OKF Actually Does</h2>
+        <p>The clearest way I can describe it: OKF answers the question <em>"what does an AI agent know before it starts working?"</em></p>
+        <p>It sits upstream of the two patterns most enterprise teams already know. Think of it as the foundational layer:</p>
+
+        <div class="stack">
+          <div class="stack-row primary">
+            <span class="stack-label">OKF</span>
+            <span class="stack-desc">Curated, stable knowledge an agent needs <em>before</em> it acts — Markdown + YAML, vendor-neutral, git-versioned, Apache 2.0</span>
+          </div>
+          <div class="stack-row">
+            <span class="stack-label">MCP</span>
+            <span class="stack-desc">How agents connect to live tools and services at runtime</span>
+          </div>
+          <div class="stack-row">
+            <span class="stack-label">RAG</span>
+            <span class="stack-desc">Search across document corpora at query time</span>
+          </div>
+        </div>
+
+        <p>Because it is just Markdown files in a git repo, every change to that knowledge is a commit — traceable, reviewable, revertible. For regulated industries, audit-readiness becomes a property of the knowledge layer itself rather than a bolt-on compliance exercise.</p>
+        <p>Three use cases feel immediately practical at enterprise scale:</p>
+        <ul class="prose-list">
+          <li><strong>Data governance.</strong> A data team exports BigQuery table definitions, metric logic and join paths as an OKF bundle. Every change is a git commit — reviewable and revertible by default, without separate compliance tooling.</li>
+          <li><strong>Operational continuity.</strong> Each incident runbook becomes a structured document an on-call agent can traverse — without paging a senior engineer at 2 a.m.</li>
+          <li><strong>Cross-vendor portability.</strong> A vendor ships a catalogue export as OKF; your agents consume it directly, with no bespoke integration. The interoperability promise enterprise platforms have made for years, and rarely kept.</li>
+        </ul>
+      </div>
+
+      <!-- Section 4: GCC -->
+      <div class="section">
+        <p class="section-label">GCC &amp; Product Leaders</p>
+        <h2>Why This Matters Specifically for GCC and Product Leaders</h2>
+        <p>Having spent years close to complex supply-chain and product platforms, this is where it gets real for me. An AI agent can read inventory tables and API schemas. But does it understand the difference between <em>available</em> and <em>allocatable</em> inventory? Why certain customers receive allocation priority? Which exceptions require human approval? That knowledge rarely lives in a database. It lives in people.</p>
+        <p>Codifying it into a governed format does three things that should interest any operating leader:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Outcome</th>
+                <th>What it means in practice</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Redundancy</strong></td>
+                <td>Tribal knowledge becomes a governed, versioned enterprise asset — it no longer walks out the door when a key person leaves</td>
+              </tr>
+              <tr>
+                <td><strong>Resilience</strong></td>
+                <td>Onboarding compresses, incident response stops depending on a handful of domain experts available at the right time</td>
+              </tr>
+              <tr>
+                <td><strong>Better products</strong></td>
+                <td>Agentic AI builds on one unified, trusted view of the enterprise rather than reassembling context from scratch on every request</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 5: Hard question -->
+      <div class="section">
+        <p class="section-label">The Honest Question</p>
+        <h2>The Question Worth Sitting With</h2>
+        <p>OKF cleanly separates knowledge <em>producers</em> (people and pipelines) from knowledge <em>consumers</em> (agents). That separation is architecturally elegant. It also deserves a candid executive conversation: as we systematically externalise institutional knowledge into machine-readable form, <strong>what is our strategy for the people who built that knowledge?</strong></p>
+        <p>I am not suggesting OKF is designed to reduce headcount — I genuinely do not believe that is the intent. But the history of enterprise technology is full of efficiency tools that reshaped workforce structures in ways nobody planned at launch. The honest answer is that the senior engineer spends less time re-explaining schemas and more time <em>curating</em> that knowledge — a higher-leverage role, if we choose to design it that way. That is a leadership decision, not a default.</p>
+        <p>OKF v0.1 is, by Google's own description, "a starting point, not a finished standard." The norms around knowledge ownership, workforce transition, and governance are still being written. And that is exactly why the conversation should start now, not after the rollout.</p>
+      </div>
+
+      <!-- Questions block -->
+      <div class="section">
+        <div class="questions">
+          <h3>I'd genuinely value your perspective</h3>
+          <ol>
+            <li>Do you see OKF as a technical interoperability standard, or as an early blueprint for the AI-native enterprise?</li>
+            <li>At what agent count does standardising your knowledge layer become worth the investment?</li>
+            <li>How is your organisation thinking about the intersection of AI context-feeding and knowledge-worker strategy?</li>
+            <li>If you are a CHRO, CDO, or GCC head: what governance frameworks are you putting in place <em>before</em> the knowledge layer is externalised?</li>
+          </ol>
+        </div>
+        <p>Sharing your experience in the comments would help more people than just me.</p>
+      </div>
+
+      <!-- Sources -->
+      <div class="sources">
+        <h3>Sources &amp; Attribution</h3>
+        <ul>
+          <li><strong>Google Cloud Blog</strong> — Sam McVeety &amp; Amir Hormati. "Introducing the Open Knowledge Format." 12 June 2026.</li>
+          <li><strong>Gartner</strong> — "40% of Enterprise Apps Will Feature Task-Specific AI Agents by 2026." Aug 2025.</li>
+          <li><strong>Gartner</strong> — "Over 40% of Agentic AI Projects Will Be Canceled by End of 2027." Jun 2025.</li>
+          <li><strong>IDC</strong> — Fortune 500 knowledge-sharing cost estimate. Widely cited; directional figure.</li>
+          <li><strong>McKinsey Global Institute</strong> — "The Social Economy: Unlocking value through social technologies." 20–25% productivity uplift.</li>
+          <li><strong>Glean</strong> — "The Definitive Guide to AI-Based Enterprise Search." 10% first-attempt success rate, 2025.</li>
+          <li><strong>Interact Research</strong> — 1.8 hours per day searching for information.</li>
+          <li><strong>Document360 / industry surveys</strong> — 62% of organisations cite poor knowledge-sharing as causing project failures.</li>
+        </ul>
+        
+      </div>
+
+    </div><!-- /wrap -->
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="wrap">
+
+      <p class="tags">#EnterpriseAI &nbsp; #AgenticAI &nbsp; #OpenKnowledgeFormat &nbsp; #DataGovernance &nbsp; #GCC &nbsp; #DigitalTransformation &nbsp; #AIStrategy &nbsp; #CXO &nbsp; #FutureOfWork</p>
+    </div>
+  </footer>
+
+  <!-- Scroll-reveal -->
+  <script>
+    const sections = document.querySelectorAll('.section, .pullquote-wrap');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    sections.forEach(s => io.observe(s));
+  </script>
+
+</body>
+</html>
